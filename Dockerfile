@@ -1,12 +1,18 @@
-FROM python:3.10.8-slim-buster
+FROM python:3.10-slim
 
-RUN apt update && apt upgrade -y
-RUN apt install git -y
+# System dependencies
+RUN apt-get update && apt-get install -y git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies
 COPY requirements.txt /requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r /requirements.txt
 
-RUN cd /
-RUN pip3 install -U pip && pip3 install -U -r requirements.txt
-RUN mkdir /Ghost-Forward-Bot
+# App files
 WORKDIR /Ghost-Forward-Bot
-COPY . /Ghost-Forward-Bot
-CMD gunicorn app:app & python3 main.py
+COPY . .
+
+# Start bot
+CMD ["python", "main.py"]
